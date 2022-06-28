@@ -35,7 +35,7 @@ public class ControllerSecurityConfig {
     return jwtConverter;
   }
   
-  private static class KeycloakRealmRoleConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
+  public static class KeycloakRealmRoleConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
     
     @Override
     public Collection<GrantedAuthority> convert(Jwt jwt) {
