@@ -2,7 +2,7 @@ package com.theagilemonkeys.crm.adapter.inbound.controller;
 
 import com.theagilemonkeys.crm.adapter.inbound.dto.CustomerDto;
 import com.theagilemonkeys.crm.adapter.inbound.dto.CustomerListDto;
-import com.theagilemonkeys.crm.adapter.inbound.service.CustomerRestService;
+import com.theagilemonkeys.crm.adapter.inbound.service.CustomerInboundService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -20,7 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CustomerController {
   
-  private final CustomerRestService service;
+  private final CustomerInboundService service;
   
   @GetMapping
   public CustomerListDto findAll() {
@@ -49,13 +50,23 @@ public class CustomerController {
   }
   
   @PutMapping("/{id}")
-  public Object update(@PathVariable("id") String id, @RequestBody Object customer) {
-    throw new UnsupportedOperationException();
+  public CustomerDto update(@PathVariable("id") String id,
+                            @RequestParam("name") String name,
+                            @RequestParam("surname") String surname,
+                            @RequestParam("photo") MultipartFile photo,
+                            JwtAuthenticationToken jwtAuthenticationToken) throws IOException {
+    var customerDto = CustomerDto.builder()
+      .id(id)
+      .name(name)
+      .surname(surname)
+      .lastUpdatedBy(getUserFromToken(jwtAuthenticationToken.getToken()))
+      .build();
+    return service.update(customerDto, Objects.nonNull(photo) ? photo.getBytes() : null);
   }
   
   @DeleteMapping("/{id}")
-  public void delete(@PathVariable("id") String id) {
-    throw new UnsupportedOperationException();
+  public void delete(@PathVariable("id") String id, JwtAuthenticationToken jwtAuthenticationToken) {
+    service.delete(id, getUserFromToken(jwtAuthenticationToken.getToken()));
   }
   
   private String getUserFromToken(Jwt jwt) {

@@ -21,17 +21,13 @@ class CustomerPersistenceService implements CustomerPersistenceGateway {
   
   @Override
   public Customer create(Customer newCustomer) {
-    return Optional.ofNullable(newCustomer)
-      .map(domainMapper::fromDomain)
-      .map(repository::save)
-      .map(domainMapper::toDomain)
-      .orElseThrow(() -> new RuntimeException("The customer was not saved correctly."));
+    return save(newCustomer);
   }
   
   @Override
   public Customer findById(String id) {
     return Optional.ofNullable(id)
-      .flatMap(repository::findById)
+      .flatMap(repository::findByIdAndDeletedFalse)
       .map(domainMapper::toDomain)
       .orElseThrow(() -> new ObjectNotFoundException(id));
   }
@@ -42,5 +38,29 @@ class CustomerPersistenceService implements CustomerPersistenceGateway {
       .map(domainMapper::toDomain)
       .toList()
       .stream();
+  }
+  
+  @Override
+  public Customer update(Customer existingDomain) {
+    return save(existingDomain);
+  }
+  
+  @Override
+  public Customer delete(Customer existingDomain) {
+    return Optional.ofNullable(existingDomain)
+      .map(domainMapper::fromDomain)
+      .map(CustomerDocument::copyAsBuilder)
+      .map(builder -> builder.deleted(true).build())
+      .map(repository::save)
+      .map(domainMapper::toDomain)
+      .orElseThrow(() -> new RuntimeException("A problem was found when trying to delete the customer."));
+  }
+  
+  private Customer save(Customer customer) {
+    return Optional.ofNullable(customer)
+      .map(domainMapper::fromDomain)
+      .map(repository::save)
+      .map(domainMapper::toDomain)
+      .orElseThrow(() -> new RuntimeException("The customer was not saved correctly."));
   }
 }

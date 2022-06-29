@@ -7,8 +7,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.Instant;
-
 @Document(collection = "customer")
 @Builder
 @Getter
@@ -21,6 +19,18 @@ public class CustomerDocument {
   private Binary photo;
   @Indexed
   private String createdBy;
-  private Instant created;
   private boolean deleted;
+  @Indexed
+  private String lastUpdatedBy;
+  
+  public static CustomerDocumentBuilder copyAsBuilder(CustomerDocument customerDocument) {
+    return CustomerDocument.builder()
+      .id(customerDocument.getId())
+      .name(customerDocument.getName())
+      .surname(customerDocument.getSurname())
+      .photo(customerDocument.getPhoto())
+      .createdBy(customerDocument.getCreatedBy())
+      .deleted(customerDocument.isDeleted())
+      .lastUpdatedBy(customerDocument.getLastUpdatedBy());
+  }
 }

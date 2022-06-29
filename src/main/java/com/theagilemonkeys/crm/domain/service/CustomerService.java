@@ -7,7 +7,9 @@ import com.theagilemonkeys.crm.domain.model.Customer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Service
@@ -18,9 +20,9 @@ class CustomerService implements CrudService<Customer> {
   private final CustomerPersistenceGateway persistenceGateway;
   
   @Override
-  public Customer create(Customer newDomain) {
-    checkCustomerAlreadyCreated(newDomain.getId());
-    return persistenceGateway.create(newDomain);
+  public Customer create(Customer newCustomer) {
+    checkCustomerAlreadyCreated(newCustomer.getId());
+    return persistenceGateway.create(newCustomer);
   }
   
   @Override
@@ -40,5 +42,34 @@ class CustomerService implements CrudService<Customer> {
     } catch (ObjectNotFoundException ex) {
       log.info(ex.getMessage() + ". Customer can be created!");
     }
+  }
+  
+  @Override
+  @Transactional
+  public Customer update(Customer existingCustomer) {
+    var persistedCustomer = findById(existingCustomer.getId());
+    var toBeUpdatedCustomerBuilder = Customer.cloneAsBuilder(persistedCustomer);
+    
+    if (Objects.nonNull(existingCustomer.getName())) {
+      toBeUpdatedCustomerBuilder.name(existingCustomer.getName());
+    }
+    if (Objects.nonNull(existingCustomer.getSurname())) {
+      toBeUpdatedCustomerBuilder.surname(existingCustomer.getSurname());
+    }
+    if (Objects.nonNull(existingCustomer.getPhoto())) {
+      toBeUpdatedCustomerBuilder.photo(existingCustomer.getPhoto());
+    }
+    toBeUpdatedCustomerBuilder.lastUpdatedBy(existingCustomer.getLastUpdatedBy());
+    
+    return persistenceGateway.update(toBeUpdatedCustomerBuilder.build());
+  }
+  
+  @Override
+  @Transactional
+  public Customer delete(Customer existingCustomer) {
+    var toBeDeletedCustomer = Customer.cloneAsBuilder(findById(existingCustomer.getId()))
+      .lastUpdatedBy(existingCustomer.getLastUpdatedBy())
+      .build();
+    return persistenceGateway.delete(toBeDeletedCustomer);
   }
 }

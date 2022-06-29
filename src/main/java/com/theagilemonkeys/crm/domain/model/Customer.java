@@ -14,4 +14,14 @@ public class Customer {
   private String surname;
   private byte[] photo;
   private String createdBy;
+  private String lastUpdatedBy;
+  
+  public static Customer.CustomerBuilder cloneAsBuilder(Customer toBeCopiedCustomer) {
+    return Customer.builder()
+      .id(toBeCopiedCustomer.getId())
+      .name(toBeCopiedCustomer.getName())
+      .surname(toBeCopiedCustomer.getSurname())
+      .photo(toBeCopiedCustomer.getPhoto())
+      .createdBy(toBeCopiedCustomer.getCreatedBy());
+  }
 }

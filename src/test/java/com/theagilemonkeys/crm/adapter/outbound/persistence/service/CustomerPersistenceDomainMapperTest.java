@@ -27,7 +27,6 @@ class CustomerPersistenceDomainMapperTest {
       .surname("surname")
       .photo(new Binary("This is the binary".getBytes()))
       .createdBy("createdBy")
-      .created(Instant.now())
       .build();
   
     var customer = domainMapper.toDomain(customerDocument);

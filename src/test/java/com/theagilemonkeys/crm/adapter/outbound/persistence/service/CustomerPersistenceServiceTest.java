@@ -8,16 +8,18 @@ import com.theagilemonkeys.crm.domain.gateway.CustomerPersistenceGateway;
 import com.theagilemonkeys.crm.domain.model.Customer;
 import org.bson.types.Binary;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.time.Instant;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = {CustomerPersistenceService.class})
@@ -63,7 +65,7 @@ class CustomerPersistenceServiceTest {
     var customer = buildCustomer();
     var customerDocument = buildCustomerDocument(customer);
     
-    when(repository.findById("123")).thenReturn(Optional.of(customerDocument));
+    when(repository.findByIdAndDeletedFalse("123")).thenReturn(Optional.of(customerDocument));
     when(domainMapper.toDomain(customerDocument)).thenReturn(customer);
     var saved = customerPersistenceGateway.findById("123");
     assertThat(saved).isEqualTo(customer);
@@ -86,6 +88,39 @@ class CustomerPersistenceServiceTest {
     assertThat(savedCustomers).isNotNull().isNotEmpty().contains(customer);
   }
   
+  @Test
+  void givenNullCustomer_whenUpdate_thenRuntimeException() {
+    assertThrows(RuntimeException.class, () -> customerPersistenceGateway.update(null));
+  }
+  
+  @Test
+  void givenACustomer_whenUpdate_thenCallRepositorySave() {
+    var customer = buildCustomer();
+    var customerDocument = buildCustomerDocument(customer);
+    
+    when(domainMapper.fromDomain(customer)).thenReturn(customerDocument);
+    when(repository.save(customerDocument)).thenReturn(customerDocument);
+    when(domainMapper.toDomain(customerDocument)).thenReturn(customer);
+    var saved = customerPersistenceGateway.update(customer);
+    assertThat(saved).isEqualTo(customer);
+  }
+  
+  @Test
+  void givenACustomer_whenDelete_thenCallRepositorySave() {
+    var customer = buildCustomer();
+    var customerDocument = buildCustomerDocument(customer);
+    
+    when(domainMapper.fromDomain(customer)).thenReturn(customerDocument);
+    when(repository.save(any())).thenReturn(customerDocument);
+    when(domainMapper.toDomain(customerDocument)).thenReturn(customer);
+    customerPersistenceGateway.delete(customer);
+    
+    var argumentCaptor = ArgumentCaptor.forClass(CustomerDocument.class);
+    verify(repository).save(argumentCaptor.capture());
+    var savedCustomerDocument = argumentCaptor.getValue();
+    assertThat(savedCustomerDocument.isDeleted()).isTrue();
+  }
+  
   private Customer buildCustomer() {
     return Customer.builder()
       .id("123")
@@ -103,7 +138,6 @@ class CustomerPersistenceServiceTest {
       .surname(customer.getSurname())
       .photo(new Binary(customer.getPhoto()))
       .createdBy(customer.getCreatedBy())
-      .created(Instant.now())
       .build();
   }
 }

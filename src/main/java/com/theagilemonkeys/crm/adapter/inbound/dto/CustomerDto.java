@@ -16,4 +16,5 @@ public class CustomerDto {
   private String surname;
   private String photo;
   private String createdBy;
+  private String lastUpdatedBy;
 }

@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.net.URI;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -22,8 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -48,6 +48,12 @@ class CustomerControllerTest {
   @Test
   void givenNoAuthentication_whenFindAll_then401Error() throws Exception {
     mockMvc.perform(get(URL_TEMPLATE))
+      .andExpect(status().isUnauthorized());
+  }
+  
+  @Test
+  void givenNoAuthentication_whenFindBy_then401Error() throws Exception {
+    mockMvc.perform(get(URL_TEMPLATE + "/123"))
       .andExpect(status().isUnauthorized());
   }
   
@@ -119,11 +125,103 @@ class CustomerControllerTest {
     
     assertThat(customerDto).isNotNull();
     assertThat(customerDto.getId()).isEqualTo("789");
+    assertThat(customerDto.getName()).isEqualTo("name");
+    assertThat(customerDto.getSurname()).isEqualTo("surname");
+    assertThat(customerDto.getPhoto()).isEqualTo(Base64.getEncoder().encodeToString("an image".getBytes()));
+    assertThat(customerDto.getCreatedBy()).isEqualTo("user");
+    assertThat(customerDto.getLastUpdatedBy()).isNull();
   }
   
   @Test
   void givenUsersWithTokens_whenFindByIdNotFound_then404Error() throws Exception {
     mockMvc.perform(get(URL_TEMPLATE + "/NOT_CREATED")
+        .with(buildJwtRequestPostProcessor("user")))
+      .andExpect(status().isNotFound());
+  }
+  
+  @Test
+  void givenUsersWithTokens_whenUpdateBeforeCreate_then404Error() throws Exception {
+    mockMvc.perform(multipart(HttpMethod.PUT, URI.create(URL_TEMPLATE + "/NOT_CREATED_YET"))
+        .file("photo", "an image".getBytes())
+        .with(buildJwtRequestPostProcessor("user"))
+        .param("name", "name")
+        .param("surname", "surname"))
+      .andExpect(status().isNotFound());
+  }
+  
+  @Test
+  void givenUsersWithTokens_whenUpdateButNoParamsProvided_then400Error() throws Exception {
+    mockMvc.perform(multipart(HttpMethod.PUT, URI.create(URL_TEMPLATE + "/NOT_UPDATED"))
+        .with(buildJwtRequestPostProcessor("user")))
+      .andExpect(status().isBadRequest());
+  }
+  
+  @Test
+  void givenUsersWithTokens_whenCreateAndThenUpdate_thenCustomerIsUpdated() throws Exception {
+    mockMvc.perform(multipart(HttpMethod.POST, URI.create(URL_TEMPLATE))
+        .file("photo", "an image".getBytes())
+        .with(buildJwtRequestPostProcessor("user"))
+        .param("id", "147")
+        .param("name", "name")
+        .param("surname", "surname"))
+      .andExpect(status().isCreated());
+    
+    mockMvc.perform(multipart(HttpMethod.PUT, URI.create(URL_TEMPLATE + "/147"))
+        .file("photo", "an updated image".getBytes())
+        .with(buildJwtRequestPostProcessor("user"))
+        .param("name", "updated name")
+        .param("surname", "updated surname"))
+      .andExpect(status().isOk());
+  
+    var resultAsString = mockMvc.perform(get(URL_TEMPLATE + "/147")
+        .with(buildJwtRequestPostProcessor("user")))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+    var customerDto = objectMapper.readValue(resultAsString, CustomerDto.class);
+  
+    assertThat(customerDto).isNotNull();
+    assertThat(customerDto.getId()).isEqualTo("147");
+    assertThat(customerDto.getName()).isEqualTo("updated name");
+    assertThat(customerDto.getSurname()).isEqualTo("updated surname");
+    assertThat(customerDto.getPhoto()).isEqualTo(Base64.getEncoder().encodeToString("an updated image".getBytes()));
+    assertThat(customerDto.getCreatedBy()).isEqualTo("user");
+    assertThat(customerDto.getLastUpdatedBy()).isEqualTo("user");
+  }
+  
+  @Test
+  void givenUsersWithTokens_whenDeleteBeforeCreate_then404Error() throws Exception {
+    mockMvc.perform(delete(URI.create(URL_TEMPLATE + "/NOT_CREATED_YET"))
+        .with(buildJwtRequestPostProcessor("user")))
+      .andExpect(status().isNotFound());
+  }
+  
+  @Test
+  void givenUsersWithTokens_whenCreateAndDelete_thenCustomerIsDeleted() throws Exception {
+    mockMvc.perform(multipart(HttpMethod.POST, URI.create(URL_TEMPLATE))
+        .file("photo", "an image".getBytes())
+        .with(buildJwtRequestPostProcessor("user"))
+        .param("id", "963")
+        .param("name", "name")
+        .param("surname", "surname"))
+      .andExpect(status().isCreated());
+  
+    var resultAsString = mockMvc.perform(get(URL_TEMPLATE + "/963")
+        .with(buildJwtRequestPostProcessor("user")))
+      .andExpect(status().isOk())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+    var customerDto = objectMapper.readValue(resultAsString, CustomerDto.class);
+  
+    assertThat(customerDto).isNotNull();
+    
+    mockMvc.perform(delete(URI.create(URL_TEMPLATE + "/963"))
+        .with(buildJwtRequestPostProcessor("user")))
+      .andExpect(status().isOk());
+  
+    mockMvc.perform(get(URL_TEMPLATE + "/963")
         .with(buildJwtRequestPostProcessor("user")))
       .andExpect(status().isNotFound());
   }

@@ -18,6 +18,7 @@ class CustomerPersistenceDomainMapper implements DomainMapper<Customer, Customer
       .surname(toBeMapped.getSurname())
       .photo(toBeMapped.getPhoto().getData())
       .createdBy(toBeMapped.getCreatedBy())
+      .lastUpdatedBy(toBeMapped.getLastUpdatedBy())
       .build();
   }
   
@@ -29,6 +30,7 @@ class CustomerPersistenceDomainMapper implements DomainMapper<Customer, Customer
       .surname(toBeMapped.getSurname())
       .photo(new Binary(BsonBinarySubType.BINARY, toBeMapped.getPhoto()))
       .createdBy(toBeMapped.getCreatedBy())
+      .lastUpdatedBy(toBeMapped.getLastUpdatedBy())
       .build();
   }
 }
