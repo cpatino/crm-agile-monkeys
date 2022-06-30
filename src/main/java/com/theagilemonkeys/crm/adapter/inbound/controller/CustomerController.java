@@ -35,18 +35,18 @@ public class CustomerController {
   
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping
-  public void create(@RequestParam("id") @NotEmpty String id,
-                     @RequestParam("name") @NotEmpty String name,
-                     @RequestParam("surname") @NotEmpty String surname,
-                     @RequestParam("photo") @NotNull MultipartFile photo,
-                     JwtAuthenticationToken jwtAuthenticationToken) throws IOException {
+  public CustomerDto create(@RequestParam("id") @NotEmpty String id,
+                            @RequestParam("name") @NotEmpty String name,
+                            @RequestParam("surname") @NotEmpty String surname,
+                            @RequestParam("photo") @NotNull MultipartFile photo,
+                            JwtAuthenticationToken jwtAuthenticationToken) throws IOException {
     var customerDto = CustomerDto.builder()
       .id(id)
       .name(name)
       .surname(surname)
       .createdBy(getUserFromToken(jwtAuthenticationToken.getToken()))
       .build();
-    service.create(customerDto, photo.getBytes());
+    return service.create(customerDto, photo.getBytes());
   }
   
   @PutMapping("/{id}")

@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -51,9 +50,15 @@ class UserControllerTest {
   }
   
   @Test
-  void givenUserWithUserRole_whenFindAll_then200() throws Exception {
-    mockMvc.perform(get(URL_TEMPLATE).with(buildJwtRequestPostProcessor("admin")))
-      .andExpect(status().isOk());
+  void givenNoAuthentication_whenFindBy_then401Error() throws Exception {
+    mockMvc.perform(get(URL_TEMPLATE + "/id"))
+      .andExpect(status().isUnauthorized());
+  }
+  
+  @Test
+  void givenNotEnabledRole_whenFindBy_then403Error() throws Exception {
+    mockMvc.perform(get(URL_TEMPLATE + "/id").with(buildJwtRequestPostProcessor("user")))
+      .andExpect(status().isForbidden());
   }
   
   private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor buildJwtRequestPostProcessor(String role) {

@@ -5,7 +5,7 @@ import com.theagilemonkeys.crm.adapter.inbound.dto.CustomerListDto;
 
 public interface CustomerInboundService {
   
-  void create(CustomerDto customerDto, byte[] photo);
+  CustomerDto create(CustomerDto customerDto, byte[] photo);
   
   CustomerListDto findAll();
   

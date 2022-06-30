@@ -1,5 +1,9 @@
 package com.theagilemonkeys.crm.adapter.inbound.controller;
 
+import com.theagilemonkeys.crm.adapter.outbound.authentication.AuthenticationAdminClient;
+import com.theagilemonkeys.crm.adapter.outbound.authentication.dto.UserDto;
+import com.theagilemonkeys.crm.adapter.outbound.authentication.dto.UserRequestDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -7,36 +11,44 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
   
+  private final AuthenticationAdminClient authenticationAdminClient;
+  
   @GetMapping
-  public List<Object> findAll() {
-    throw new UnsupportedOperationException();
+  public List<UserDto> findAll() {
+    return authenticationAdminClient.findAllUsers();
   }
   
   @GetMapping("/{id}")
-  public Object findBy(@PathVariable("id") String id) {
-    throw new UnsupportedOperationException();
+  public UserDto findBy(@PathVariable("id") String id) {
+    return authenticationAdminClient.findUserBy(id);
   }
   
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping
-  public void create(@RequestBody Object user) {
-    throw new UnsupportedOperationException();
+  public UserDto create(@RequestBody UserRequestDto requestDto) {
+    return authenticationAdminClient.createUser(requestDto);
   }
   
   @PutMapping("/{id}")
-  public Object update(@PathVariable("id") String id, @RequestBody Object user) {
-    throw new UnsupportedOperationException();
+  public UserDto update(@PathVariable("id") String id, @RequestBody UserRequestDto requestDto) {
+    return authenticationAdminClient.updateUser(id, requestDto);
   }
   
   @DeleteMapping("/{id}")
   public void delete(@PathVariable("id") String id) {
-    throw new UnsupportedOperationException();
+    authenticationAdminClient.deleteUser(id);
   }
   
-  @PutMapping("/{id}/administrator")
-  public Object changeAdminStatus(@PathVariable("id") String id, @RequestBody Object user) {
-    throw new UnsupportedOperationException();
+  @PutMapping("/{id}/promote")
+  public Object promoteToAdministrator(@PathVariable("id") String id) {
+    return authenticationAdminClient.addAdministratorStatus(id);
+  }
+  
+  @PutMapping("/{id}/revoke")
+  public Object revokeAdministrativePermission(@PathVariable("id") String id) {
+    return authenticationAdminClient.removeAdministratorStatus(id);
   }
 }

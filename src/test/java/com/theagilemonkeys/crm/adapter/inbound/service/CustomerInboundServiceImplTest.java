@@ -25,12 +25,22 @@ class CustomerInboundServiceImplTest {
   
   @Test
   void whenCreate_thenCallCrudService() {
+    var customer = Customer.builder()
+      .id("id")
+      .name("name")
+      .surname("surname")
+      .photo("an image".getBytes())
+      .createdBy("createdBy")
+      .lastUpdatedBy("last")
+      .build();
+    
     var customerDto = CustomerDto.builder()
       .id("id")
       .name("name")
       .surname("surname")
       .createdBy("createdBy")
       .build();
+    when(customerCrudService.create(any())).thenReturn(customer);
     service.create(customerDto, "an image".getBytes());
     verify(customerCrudService).create(any());
   }

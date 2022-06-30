@@ -19,7 +19,7 @@ class CustomerInboundServiceImpl implements CustomerInboundService {
   private final CrudService<Customer> customerCrudService;
   
   @Override
-  public void create(CustomerDto customerDto, byte[] photo) {
+  public CustomerDto create(CustomerDto customerDto, byte[] photo) {
     var customer = Customer.builder()
       .id(customerDto.getId())
       .name(customerDto.getName())
@@ -27,7 +27,7 @@ class CustomerInboundServiceImpl implements CustomerInboundService {
       .photo(photo)
       .createdBy(customerDto.getCreatedBy())
       .build();
-    customerCrudService.create(customer);
+    return fromDomain(customerCrudService.create(customer));
   }
   
   @Override
