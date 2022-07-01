@@ -1,0 +1,541 @@
+{
+	"info": {
+		"_postman_id": "3c659989-d843-4933-a93d-d48e811596ef",
+		"name": "CRM",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Token",
+			"item": [
+				{
+					"name": "CRM User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"pm.collectionVariables.set(\"crm_user_token\", jsonData[\"access_token\"]);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "default"
+								},
+								{
+									"key": "scope",
+									"value": "openid",
+									"type": "default"
+								},
+								{
+									"key": "client_id",
+									"value": "crm_client",
+									"type": "default"
+								},
+								{
+									"key": "client_secret",
+									"value": "lFoEkebcHAY9cGHFGeDdbdmhpeM5YFjb",
+									"type": "default"
+								},
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "default"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "default"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/realms/crm/protocol/openid-connect/token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"realms",
+								"crm",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "API",
+			"item": [
+				{
+					"name": "User",
+					"item": [
+						{
+							"name": "Find All",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{crm_user_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:8081/crm/users",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"crm",
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{crm_user_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:8081/crm/users/f4015117-d69a-4e34-842c-c9dadd94b220",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"crm",
+										"users",
+										"f4015117-d69a-4e34-842c-c9dadd94b220"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{crm_user_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"test\",\r\n    \"password\": \"test\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:8081/crm/users",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"crm",
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{crm_user_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"test\",\r\n    \"password\": \"test-updated\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:8081/crm/users/f4015117-d69a-4e34-842c-c9dadd94b220",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"crm",
+										"users",
+										"f4015117-d69a-4e34-842c-c9dadd94b220"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Promote",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{crm_user_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "localhost:8081/crm/users/f4015117-d69a-4e34-842c-c9dadd94b220/promote",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"crm",
+										"users",
+										"f4015117-d69a-4e34-842c-c9dadd94b220",
+										"promote"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Revoke",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{crm_user_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "localhost:8081/crm/users/f4015117-d69a-4e34-842c-c9dadd94b220/revoke",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"crm",
+										"users",
+										"f4015117-d69a-4e34-842c-c9dadd94b220",
+										"revoke"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{crm_user_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:8081/crm/users/f4015117-d69a-4e34-842c-c9dadd94b220",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"crm",
+										"users",
+										"f4015117-d69a-4e34-842c-c9dadd94b220"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Customer",
+					"item": [
+						{
+							"name": "Find All",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{crm_user_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:8081/crm/customers",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"crm",
+										"customers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{crm_user_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+										"key": "Content-Type",
+										"value": "multipart/form-data",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "id",
+											"value": "abc",
+											"type": "default"
+										},
+										{
+											"key": "name",
+											"value": "name",
+											"type": "default"
+										},
+										{
+											"key": "surname",
+											"value": "surname",
+											"type": "default"
+										},
+										{
+											"key": "photo",
+											"type": "file",
+											"src": "/C:/Users/carli/Downloads/fima_carlos.png"
+										}
+									]
+								},
+								"url": {
+									"raw": "localhost:8081/crm/customers",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"crm",
+										"customers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{crm_user_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:8081/crm/customers/abc",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"crm",
+										"customers",
+										"abc"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{crm_user_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+										"key": "Content-Type",
+										"value": "multipart/form-data",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "name-updated",
+											"type": "default"
+										},
+										{
+											"key": "surname",
+											"value": "surname-updated",
+											"type": "default"
+										},
+										{
+											"key": "photo",
+											"type": "file",
+											"src": "/C:/Users/carli/Downloads/fima_carlos.png"
+										}
+									]
+								},
+								"url": {
+									"raw": "localhost:8081/crm/customers/abc",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"crm",
+										"customers",
+										"abc"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{crm_user_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:8081/crm/customers/abc",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"crm",
+										"customers",
+										"abc"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "crm_user_token",
+			"value": ""
+		}
+	]
+}
